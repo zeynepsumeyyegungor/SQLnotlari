@@ -49,12 +49,15 @@ isim VARCHAR(50),
 veli_isim VARCHAR(50),
 yazili_notu real
 );
+Begin;
 insert into ogrenciler2 VALUES(default,'Ali Can','Hasan Can',75.5);
 insert into ogrenciler2 VALUES(default,'Canan Gul','Ayse Sen',90.5);
 savepoint x;
 insert into ogrenciler2 VALUES (default,'Kemal Can','Ahmet Can',85.5);
 insert into ogrenciler2 VALUES (default,'Ahmet Şen','Ayşe Can',65.5);
+
 ROLLBACK TO x;
+
 select * from ogrenciler2;
 commit;
 --Transaction kullanımında SERIAL data türü kullanımı tavsiye edilmez.
@@ -63,8 +66,8 @@ commit;
 -- NOT : PostgreSQL de transaction kullanımı için 'Begin' komutuyla başlarız sonrasında tekrar yanlış bir veriyi
 -- düzeltmek veya bizim için önemli olan verilerden sonra ekleme yapabilmek için 'SAVEPOINT savepointadi'
 -- kullanırız ve bu savepointe dönebilmek için 'ROLLBACK TO savepointismi'
--- komutunu kullanırız ve rollback çalıştırıldığında savepoint yazdığımız satırın üstündeki verileri tabloda bize
--- verir ve son olarak Transaction'ı sonlandırmak için mutlaka 'COMMIT' komutu kullanırız. MySQL de
+-- komutunu kullanırız ve rollback çalıştırıldığında savepoint yazdığımız satırın üstündeki verileri tabloda bize verir
+-- ve son olarak Transaction'ı sonlandırmak için mutlaka 'COMMIT' komutu kullanırız. MySQL de
 -- transaction olmadanda kullanılır
 -- DML - DELETE -
 --DELETE FROM tablo_adi --> Tablo'nun tüm içeriğini siler
@@ -83,7 +86,9 @@ INSERT INTO ogrenciler VALUES(125, 'Kemal Yasa', 'Hasan',85);
 INSERT INTO ogrenciler VALUES(126, 'Nesibe Yilmaz', 'Ayse',95);
 INSERT INTO ogrenciler VALUES(127, 'Mustafa Bak', 'Can',99);
 INSERT INTO ogrenciler VALUES(127, 'Mustafa Bak', 'Ali', 99);
+
 select * from ogrenciler;
+
 -- Soru : id'si 124 olan öğrenciyi siliniz
 DELETE FROM ogrenciler WHERE id = 124;
 -- Soru : ismi Kemal Yasa olan satırı siliniz
