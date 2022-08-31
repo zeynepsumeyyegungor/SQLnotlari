@@ -13,97 +13,155 @@ INSERT INTO workers VALUES(456789012, 'Eddie Murphy', 'Virginia', 1000, 'GOOGLE'
 INSERT INTO workers VALUES(567890123, 'Eddie Murphy', 'Texas', 7000, 'MICROSOFT');
 INSERT INTO workers VALUES(456789012, 'Brad Pitt', 'Texas', 1500, 'GOOGLE');
 INSERT INTO workers VALUES(123456710, 'Mark Stone', 'Pennsylvania', 2500, 'IBM');
-
 SELECT * FROM workers;
-
---Toplam salary değeri 2500 üzeri olan bir çalışan için salary toplamını bulun
-
-SELECT name, SUM(salary) AS "Total Salary"
-FROM workers
-GROUP BY name
-HAVING SUM(salary)>2500; --Group By olunca "WHERE" kullanılmaz,"HAVING" kullanılır.
-
---Birden fazla çalışanı olan, her bir state için çalışan toplamlarını bulun.
-
-SELECT state,COUNT (state) AS number_of_employees
-FROM workers
-GROUP BY state
-HAVING COUNT (state) >1;  --HAVING,Group By filtreleme için kullanılır.
-
-SELECT * FROM workers;
-
---Her bir state için değeri 3000'den az olan maximum salary değerlerini bulun.
-select state, max(salary) as "max salary" from workers where salary<3000 GROUP by state having max(salary) <3000;
-
---Her bir company için değeri 2000'den fazla olan minimum salary değerlerini bulun.
-select company, min(salary) as "min salary"
+--Toplam salary değeri 2500 üzeri olan her bir çalışan için salary toplamını bulun.
+select name, sum(salary) as "Total Salary"
 from workers
-where salary>2000
-GROUP by company
+group by name
+having sum(salary)>2500;-->Group By ardından where kullanılmaz
+--Birden fazla çalışanı olan, her bir state için çalışan toplamlarını bulun.
+select state, count(state) as number_of_employees
+from workers
+group by state
+having count(state) >1;-->Having, Group By ardından filtreleme icin kullanılır
+--Her bir state için değeri 3000'den az olan maximum salary değerlerini bulun.
+select state,max(salary)
+from workers
+group by state
+having max(salary)<3000;
+--Her bir company için değeri 2000'den fazla olan minimum salary değerlerini bulun.
+select company,min(salary) as min_salary
+from workers
+group by company
 having min(salary)>2000;
-
 --Tekrarsız isimleri çağırın.
-select DISTINCT name from workers;
-
+select distinct name
+from workers;-->DISTINCT clause, cagırılan terimlerden tekrarlı olanların sadece birincisini alır.
 --Name değerlerini company kelime uzunluklarına göre sıralayın.
-select name, company from workers order by length(company) desc;
-
+select name, company
+from workers
+order by length(company);
 --Tüm name ve state değerlerini aynı sütunda çağırarak her bir sütun değerinin uzunluğuna göre sıralayın.
---1.Yol;
-select name|| '    '|| state as "uzunluk" from workers order by length (name|| ' '|| state) DESC;
---2.Yol;
-select concat(name,' ', state) as name_and_state from workers order by length(name) + length(state);
-
+--Concat() fonksiyonu birden fazla sutun veya String degerini birlestirmek icin kullanılır
+--1. yol
+select concat(name, ' ', state) as name_and_state
+from workers
+order by length(name) + length(state);
+--2. yol
+select name || ' ' || state || ' ' || length(name) + length(state) as "Name and States"
+from workers
+order by length(name) + length(state);
 /*
-UNION Operator:
-1) iki sorgu (query) sonucunu birleştirmek için kullanılır,
-2) Tekrarsız(unique) recordları verir,
-3) Tek bir sütuna çok sütun koyabiliriz,
-4) Tek bir sütuna çok sütun koyarken mevcut data durumuna dikkat etmek gerekir.
+UNION Operator: 1) iki sorgu(query) sonucunu birlestirmek icin kullanılır.
+					2) Tekrarsız(unique) recordları(satırları) verir
+					3)tek bir sutuna cok sutun koyabiliriz
+					4)tek bir sutuna cok sutun koyarken mevcut data durumuna dikkat etmek gerekir
 */
-
---salary değeri 3000'den yüksek olan state değerlerini ve 2000'den küçük olan name değerlerini tekrarsız olarak bulun.
-SELECT state AS "Name and State",salary
-FROM workers
-WHERE salary>3000
-
-UNION ALL --> UNION ile aynı işi yapar ancak,tekrarlı değerleri de verir
-
-SELECT name,salary
-FROM workers
-WHERE salary<2000;
-
+--salary değeri 3000'den yüksek olan state değerlerini ve salary değeri 2000'den küçük olan name değerlerini tekrarsız olarak bulun.
+select state as "Name and State", salary
+from workers
+where salary > 3000
+UNION
+select name, salary
+from workers
+where salary < 2000;
+--salary değeri 3000'den yüksek olan state değerlerini ve 2000'den küçük olan name değerlerini tekrarlı olarak bulun.
+select state as "Name and State", salary
+from workers
+where salary > 3000
+UNION ALL -->UNION ile aynı işi yapar. Ancak, tekrarlı degerleri de verir.
+select name, salary
+from workers
+where salary < 2000;
 --salary değeri 1000'den yüksek, 2000'den az olan "ortak" name değerlerini bulun.
-SELECT NAME
-FROM workers
-Where salary >1000
-
-INTERSECT  -- ÜSTTEKİ SELECT'TEN VE ALTTAKİ SELECT TABLOSUNDAN ORTAK OLANLARI BULUYOR
---INTERSECT Operator: İki sorgu (query) sonucunun ortak(common) değerlerini verir. Unique(tekrarsız) recordları verir.
-SELECT NAME
-FROM workers
-Where salary <2000;
-
+select name
+from workers
+where salary >1000
+INTERSECT --INTERSECT Operator: İki sorgu (query) sonucunun ortak(common) değerlerini verir. Unique(tekrarsız) recordları verir.
+select name
+from workers
+where salary <2000;
 --salary değeri 2000'den az olan ve company değeri  IBM, APPLE yada MICROSOFT olan ortak "name" değerlerini bulun.
-SELECT name
-From workers
-Where salary <2000
-
+select name
+from workers
+where salary < 2000
 INTERSECT
-
-Select name
-From workers
-Where company In('IBM','APPLE','MICROSOFT');
-
+select name
+from workers
+where company IN('IBM', 'APPLE', 'MICROSOFT');
 --EXCEPT Operator : Bir sorgu sonucundan başka bir sorgu sonucunu çıkarmak için kullanılır. Unique(tekrarsız) recordları verir.
 --salary değeri 3000'den az ve GOOGLE'da çalışmayan  name değerlerini bulun.
-
-SELECT name
-FROM workers
-WHERE SALARY <3000
-
+select name
+from workers
+where salary <3000
 EXCEPT
-
-SELECT name
-FROM workers
-WHERE company ='GOOGLE';
+select name
+from workers
+where company = 'GOOGLE';
+CREATE TABLE my_companies
+(
+  company_id CHAR(3),
+  company_name VARCHAR(20)
+);
+INSERT INTO my_companies VALUES(100, 'IBM');
+INSERT INTO my_companies VALUES(101, 'GOOGLE');
+INSERT INTO my_companies VALUES(102, 'MICROSOFT');
+INSERT INTO my_companies VALUES(103, 'APPLE');
+SELECT * FROM my_companies;
+CREATE TABLE orders
+(
+  company_id CHAR(3),
+  order_id CHAR(3),
+  order_date DATE
+);
+INSERT INTO orders VALUES(101, 11, '17-Apr-2020');
+INSERT INTO orders VALUES(102, 22, '18-Apr-2020');
+INSERT INTO orders VALUES(103, 33, '19-Apr-2020');
+INSERT INTO orders VALUES(104, 44, '20-Apr-2020');
+INSERT INTO orders VALUES(105, 55, '21-Apr-2020');
+SELECT * FROM orders;
+/*
+JOINS: 1) INNER JOIN: Ortak (Common) datayı verir.
+       2) LEFT JOIN: Birinci table'ın tüm datasını verir.
+       3) RIGHT JOIN: İkinci table'ın tüm datasını verir.
+       4) FULL JOIN: İki table'ın da tüm datasını verir.
+       5) SELF JOIN: Tek table üzerinde çalışırken iki table varmış gibi çalışılır.
+*/
+--1) INNER JOIN
+--Ortak companyler için company_name, order_id ve order_date değerlerini çağırın.
+select mc.company_name, o.order_id, o.order_date
+from my_companies mc INNER JOIN orders o
+ON mc.company_id = o.company_id;
+-- 2) LEFT JOIN
+--my_companies table'ındaki companyler için order_id ve order_date değerlerini çağırın.
+select  mc.company_name, o.order_id, o.order_date
+from my_companies mc LEFT JOIN orders o
+ON mc.company_id = o.company_id;
+--3) RIGHT JOIN
+--Orders table'ındaki company'ler için company_name, company_id ve order_date değerlerini çağırın.
+select  mc.company_name, o.company_id, o.order_date
+from my_companies mc RIGHT JOIN orders o
+ON mc.company_id = o.company_id;
+--FULL JOIN
+--İki table'dan da company_name, order_id ve order_date değerlerini çağırın.
+select mc.company_name, o.order_id, o.order_date
+from orders o FULL JOIN my_companies mc
+ON mc.company_id = o.company_id;
+--SELF JOIN
+CREATE TABLE workers
+(
+  id CHAR(2),
+  name VARCHAR(20),
+  title VARCHAR(60),
+  manager_id CHAR(2)
+);
+INSERT INTO workers VALUES(1, 'Ali Can', 'SDET', 2);
+INSERT INTO workers VALUES(2, 'John Walker', 'QA', 3);
+INSERT INTO workers VALUES(3, 'Angie Star', 'QA Lead', 4);
+INSERT INTO workers VALUES(4, 'Amy Sky', 'CEO', 5);
+SELECT * FROM workers;
+--workers tablosunu kullanarak çalışanların yöneticilerini gösteren bir tablo hazırlayın.
+select employee.name AS Employee, manager.name AS Manager
+from workers employee FULL JOIN workers manager
+ON employee.manager_id = manager.id;
+SELECT * FROM workers;
